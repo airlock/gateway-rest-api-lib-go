@@ -1,0 +1,21 @@
+# Configuration for oapi-codegen (https://github.com/oapi-codegen/oapi-codegen)
+# Regenerate with:  go generate ./...
+package: gateway
+output: gateway.gen.go
+generate:
+  models: true
+  client: true
+output-options:
+  # nothing is prunable today; guards against a spec with orphaned schemas
+  skip-prune: true
+  # Bytes() on responses, so APIResponse can carry the body (helpers.go)
+  client-response-bytes-function: true
+  # suffix cross-section name clashes instead of failing codegen
+  resolve-type-name-collisions: true
+  # idiomatic Go initialisms: SSLCertificateDto, not SslCertificateDto
+  name-normalizer: ToCamelCaseWithInitialisms
+  # the generated low-level client, renamed out of the way so this package
+  # can export Client as its own type
+  client-type-name: apiClient
+  # acronyms in this API that the built-in initialism list misses
+  additional-initialisms: ["SSL", "ICAP", "CSRF"]

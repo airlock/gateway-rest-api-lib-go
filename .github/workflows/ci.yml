@@ -1,0 +1,54 @@
+# Continuous integration: runs on every push to main and on every pull request.
+#
+# The build logic lives in the Makefile so that CI and local runs are
+# identical. `make check` verifies the active spec, regenerates the client,
+# checks formatting, runs vet, staticcheck and the race tests, and fails if
+# the committed generated code is out of sync with spec/active.json.
+#
+# Integration tests against a real gateway are not part of CI; run them
+# manually with:
+#   TEST_HOST=... TEST_API_KEY=... make integration
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check (Go ${{ matrix.go.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        go:
+          # The minimum version the module promises, read from go.mod.
+          - { name: go.mod, file: go.mod, version: "" }
+          # The current stable release, so a newer toolchain is tested too.
+          - { name: stable, file: "", version: stable }
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: ${{ matrix.go.version }}
+          go-version-file: ${{ matrix.go.file }}
+          cache: true
+
+      - name: Regenerate, lint, test, and check for drift
+        run: make check
+
+      - name: Check for known vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...

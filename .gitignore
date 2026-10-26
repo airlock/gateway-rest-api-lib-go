@@ -1,0 +1,35 @@
+# Compiled binaries and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/bin/
+/dist/
+
+# Test, coverage, and profiling output (make cover writes coverage*.out)
+*.test
+*.out
+*.prof
+*.pprof
+
+# Go workspace files (not used by a library)
+go.work
+go.work.sum
+
+# Local credentials for the examples and integration tests
+.env
+.env.*
+api_key.conf
+
+# Configuration backup written by examples/tutorial
+config.zip
+
+# Editor and tool state
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+.claude/
+AGENTS.md
